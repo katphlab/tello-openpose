@@ -1,0 +1,6 @@
+__pycache__/
+*.json
+models/__pycache__/
+modules/__pycache__/
+*.pth
+*.jpg

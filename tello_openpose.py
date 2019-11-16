@@ -16,7 +16,7 @@ from pynput import keyboard
 import argparse
 
 from math import pi, atan2
-from OP import *
+from pose_wrapper import PoseWrapper
 from math import atan2, degrees, sqrt
 from simple_pid import PID
 from  multiprocessing import Process, Pipe, sharedctypes
@@ -26,7 +26,6 @@ from SoundPlayer import SoundPlayer, Tone
 import logging
 import re
 import sys
-
 
 
 
@@ -76,7 +75,7 @@ def openpose_worker():
     tello.drone.start_recv_thread()
     tello.init_sounds()
     tello.init_controls()
-    tello.op = OP(number_people_max=1, min_size=25, debug=tello.debug)
+    tello.op = PoseWrapper(draw_render=True)
 
     while True:
         tello.fps.update()
@@ -121,8 +120,8 @@ def main(use_multiprocessing=False, log_level=None):
     else:
         child_cnx = None
 
-    tello = TelloController(use_face_tracking=True, 
-                            kbd_layout="AZERTY", 
+    tello = TelloController(use_face_tracking=False, 
+                            kbd_layout="QWERTY", 
                             write_log_data=False, 
                             log_level=log_level, child_cnx=child_cnx)
    
@@ -209,7 +208,7 @@ class TelloController(object):
         self.record = False
         self.keydown = False
         self.date_fmt = '%Y-%m-%d_%H%M%S'
-        self.drone = tellopy.Tello(start_recv_thread=not self.use_multiprocessing)
+        self.drone = tellopy.Tello()
         self.axis_command = {
             "yaw": self.drone.clockwise,
             "roll": self.drone.right,
@@ -248,10 +247,9 @@ class TelloController(object):
 
                 
         # Setup Openpose
-        if not self.use_multiprocessing:
-            
-            self.op = OP(number_people_max=1, min_size=25, debug=self.debug)
-        self.use_openpose = False
+        if not self.use_multiprocessing:  
+            self.op = PoseWrapper(draw_render=True)
+        self.use_openpose = True
                 
              
         self.morse = CameraMorse(display=False)
@@ -325,12 +323,13 @@ class TelloController(object):
             self.drone.log.set_level(2)
         self.drone.connect()
         self.set_video_encoder_rate(2)
-        self.drone.start_video()
+        self.drone.wait_for_connection(60)
+        # self.drone.start_video()
 
         self.drone.subscribe(self.drone.EVENT_FLIGHT_DATA,
                              self.flight_data_handler)
-        self.drone.subscribe(self.drone.EVENT_LOG_DATA,
-                             self.log_data_handler)
+        # self.drone.subscribe(self.drone.EVENT_LOG,
+        #                      self.log_data_handler)
         self.drone.subscribe(self.drone.EVENT_FILE_RECEIVED,
                              self.handle_flight_received)
 
@@ -617,7 +616,7 @@ class TelloController(object):
             # Call to openpose detection
             if self.use_openpose:
 
-                nb_people, pose_kps, face_kps = self.op.eval(frame)
+                nb_people, pose_kps = self.op.eval(frame)
                 
                 target = None
                 
@@ -687,7 +686,7 @@ class TelloController(object):
                                 self.drone.land()      
 
                     # Draw the skeleton on the frame
-                    self.op.draw_body(frame)
+                    # self.op.draw_body(frame)
                     
                     # In tracking mode, we track a specific body part (an openpose keypoint):
                     # the nose if visible, otherwise the neck, otherwise the midhip
@@ -850,7 +849,7 @@ class TelloController(object):
         return frame
 
     def take_picture(self):
-        """
+        """ 
             Tell drone to take picture, image sent to file handler
         """
         self.drone.take_picture()
@@ -880,7 +879,7 @@ class TelloController(object):
         """
             Tell drone to start a 'throw and go'
         """
-        self.drone.throw_and_go()      
+        self.drone.throw_and_go()    
         self.tracking_after_takeoff = tracking
         
     def delayed_takeoff(self, delay=5):
@@ -958,6 +957,7 @@ class TelloController(object):
         """
             Listener to log data from the drone.
         """  
+        print(data)
         pos_x = -data.mvo.pos_x
         pos_y = -data.mvo.pos_y
         pos_z = -data.mvo.pos_z

@@ -1,29 +1,29 @@
 # tello-openpose
-Using OpenPose with the Tello Drone to make selfies. This program gets the video stream from the Tello camera, processes it to make the drone follow the person's face and recognize poses to control the drone.  
+This repo replaces [Openpose](https://github.com/CMU-Perceptual-Computing-Lab/openpose) framework used in [tello-openpose](https://github.com/katphlab/tello-openpose) repository with a [lighter and faster implementation of pose estimation](https://github.com/Daniil-Osokin/lightweight-human-pose-estimation-3d-demo.pytorch) which can even run on CPU using [OpenVINO](https://software.intel.com/en-us/openvino-toolkit).
 
-Video demonstration here : __[Tello drone and computer vision: selfie air stick](https://youtu.be/RHRQoaqQIgo)__
+**Majority of the credit goes to owners of the above repositories**, some credit to **me** for integrating the new pose detection :)
 
-<img src="media/capture.png" alt="Selfie air stick"  title="Selfie air stick" />
+Tested only on Ubuntu 18.04 using MX150 (2GB) graphics card giving 15-20 FPS. If you want to use a CPU, install OpenVINO SDK and change the inference method.
 
-Warning : this is just my exploration of a few computer vision techniques that can be used with a Tello drone. I did it for the fun and didn't try to make a finalized, well packaged product. So sorry for the non-optimized code and the lack of comments :-) 
-
-Tested only on Ubuntu 18.04. **You need a powerful nvidia GPU to run Openpose fast enough.** A GTX 1080Ti was used here. Probably, a less powerful GPU can also work, but you will get a lower "frames/second" and will need to tune the PID controller parameters.
+**TODO**
+1. Make the code easier to use and understand 
+2. Add requirements.txt 
 
 ## Libraries and packages
+I've attached a conda environent for the versions of the packages, use it at with caution.
 
 ### OpenCV, pynput, pygame : 
 Mainly used for the UI (display windows, read keyboard events, play sounds). Any recent version should work.
 
-### Openpose :
-I use the official release https://github.com/CMU-Perceptual-Computing-Lab/openpose
+### Pose estimation :
+I use the official release https://github.com/Daniil-Osokin/lightweight-human-pose-estimation-3d-demo.pytorch
 
-Installed (with Python API) as explained here : https://github.com/CMU-Perceptual-Computing-Lab/openpose/blob/master/doc/installation.md#python-api
+Download the pretrained model from the [original author's link](https://drive.google.com/file/d/1niBUbUecPhKt3GyeDNukobL4OQ3jqssH/view?usp=sharing) and place it in the base folder.
 
 ### TelloPy :
 Python package which controls the Tello drone.
 https://github.com/hanyazou/TelloPy
-
-
+Do not install from pip, clone the repo and install from there, else some functionality might not work.
 
 ### simple-pid :
 A simple and easy to use PID controller in Python.
@@ -33,14 +33,12 @@ Used here to control the yaw, pitch, rolling and throttle of the drone.
 
 The parameters of the PIDs may depend on the processing speed and need tuning to adapt to the FPS you can get. For instance, if the PID that controls the yaw works well at 20 frames/sec, it may yield oscillating yaw at 10 frames/sec.  
 
-
-
 ## Files of the repository
 
-### OP.py :
-My own layer above the official Openpose python wrapper : https://github.com/CMU-Perceptual-Computing-Lab/openpose/blob/master/doc/modules/python_module.md
+### pose_wrapper.py :
+My own layer using the pose estimation demo: https://github.com/Daniil-Osokin/lightweight-human-pose-estimation-3d-demo.pytorch/blob/master/demo.py
 
-Modify MODEL_FOLDER to point to the directory where the models are installed.
+Change the model path in pose_wrapper if changing the model.
 
 ### CameraMorse.py :
 
@@ -67,9 +65,6 @@ Instead of starting from scratch, I used the code from: https://github.com/Uboti
 
 Just run with:
 python tello_openpose.py
-
-Don't use the "--multiprocess" argument. I had to hack TelloPy to make it work, so it would not work with the official TelloPy. My goal was to have one process reading the video stream from the Tello and one process doing all the remaining stuff, in particular, the intensive Openpose processing. On my configuration, it gives a slightly better FPS (I used it to make the youtube video), but not as good as I expected (and the reason is still not clear to me). It would need more investigation.
-
 
 -----
 A big thanks to all the people who wrote and shared the libraries/programs I have used for this project !
