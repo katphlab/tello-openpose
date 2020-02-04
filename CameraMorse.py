@@ -60,7 +60,7 @@ class CameraMorse:
         Long press = dash
         If we associate series of dots/dashes to commands, we can then ask the script to launch these commands.
     """
-    def __init__(self, dot_duration=0.2, dash_duration=None, blank_duration=None, display=False, threshold=40):
+    def __init__(self, dot_duration=0.5, dash_duration=None, blank_duration=None, display=False, threshold=40):
         """
             display : True to display to display brightness(time) in an opencv window (via an object RollingGraph)
         """
@@ -79,7 +79,7 @@ class CameraMorse:
             self.blank_duration = blank_duration
 
         # Dots or dashes are delimited by a "press" action followed by a "release" action
-        # In normal situation, the brightness is above 'threshold'
+        # In normal situation, the brightness is above 'threshold'e
         # When brightness goes below 'threshold' = "press" action
         # Then when brightness goes back above 'threshold' = "release" action
         self.threshold = threshold
