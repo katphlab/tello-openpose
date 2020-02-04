@@ -165,7 +165,7 @@ class PoseWrapper:
 
 if __name__ == '__main__' :
     # Read video
-    video=cv2.VideoCapture(0)
+    video=cv2.VideoCapture('v1.mp4')
     video.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
     video.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
     
@@ -175,7 +175,7 @@ if __name__ == '__main__' :
     #     fourcc = cv2.VideoWriter_fourcc(*"MJPG")
     #     out=cv2.VideoWriter(args.output,fourcc,30,(w,h))
 
-    my_op = OP(draw_render=True)
+    my_op = PoseWrapper(draw_render=True)
 
     fps = FPS()
     while True:

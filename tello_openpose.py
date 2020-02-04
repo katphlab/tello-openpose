@@ -19,7 +19,7 @@ from math import pi, atan2
 from pose_wrapper import PoseWrapper
 from math import atan2, degrees, sqrt
 from simple_pid import PID
-from  multiprocessing import Process, Pipe, sharedctypes
+from multiprocessing import Process, Pipe, sharedctypes
 from FPS import FPS
 from CameraMorse import CameraMorse, RollingGraph
 from SoundPlayer import SoundPlayer, Tone
@@ -701,7 +701,7 @@ class TelloController(object):
                             ref_x = int(w/2)
                             ref_y = int(h/2)
                         else:
-                            target = self.op.get_body_kp("MidHip")
+                            target = self.op.get_body_kp("BodyCenter")
                             if target is not None:         
                                 ref_x = int(w/2)
                                 ref_y = int(0.75*h)
